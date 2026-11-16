@@ -27,7 +27,7 @@ function OrderConfirmationContent() {
 
       <h1 className="text-3xl font-bold text-surface-900 mb-2">Order Placed! 🎉</h1>
       <p className="text-surface-500 mb-8">
-        Thank you for your order. We'll process it shortly.
+        Thank you for your order. We&apos;ll process it shortly.
       </p>
 
       {/* Order ID Card */}
@@ -46,7 +46,7 @@ function OrderConfirmationContent() {
         <div className="card p-4">
           <div className="flex items-center gap-2 mb-2">
             <FiPackage className="w-5 h-5 text-primary-600" />
-            <h3 className="font-semibold text-surface-800 text-sm">What's Next?</h3>
+            <h3 className="font-semibold text-surface-800 text-sm">What&apos;s Next?</h3>
           </div>
           <ul className="text-xs text-surface-600 space-y-1.5">
             <li>• Our team will confirm your order</li>

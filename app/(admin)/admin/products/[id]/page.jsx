@@ -522,7 +522,7 @@ export default function AdminProductDetailPage() {
             <FiPackage className="w-10 h-10 text-surface-300 mx-auto mb-3" />
             <p className="text-surface-500 font-medium mb-1">কোনো Variant নেই</p>
             <p className="text-xs text-surface-400 mb-4">
-              উপরের "Variant যোগ করুন" button এ click করুন
+              উপরের &quot;Variant যোগ করুন&quot; button এ click করুন
             </p>
             <button
               onClick={() => setShowVariantForm(true)}

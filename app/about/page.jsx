@@ -116,11 +116,11 @@ export default function AboutPage() {
             </div>
             <h3 className="text-xl font-bold text-surface-900 mb-2">ShopBD</h3>
             <p className="text-primary-600 font-semibold text-sm mb-4">
-              Bangladesh's Premier Online Store
+              Bangladesh&apos;s Premier Online Store
             </p>
             <p className="text-surface-500 text-sm">
-              "আমাদের স্বপ্ন হলো প্রতিটি বাংলাদেশীর দোরগোড়ায় বিশ্বমানের পণ্য
-              পৌঁছে দেওয়া।"
+              &quot;আমাদের স্বপ্ন হলো প্রতিটি বাংলাদেশীর দোরগোড়ায় বিশ্বমানের পণ্য
+              পৌঁছে দেওয়া।&quot;
             </p>
           </div>
         </div>

@@ -212,7 +212,7 @@ export default  function ProductsContent() {
             <div className="flex flex-wrap gap-2 mb-4">
               {activeSearch && (
                 <span className="inline-flex items-center gap-1.5 text-xs bg-primary-50 text-primary-700 px-2.5 py-1 rounded-full border border-primary-200 font-medium">
-                  "{activeSearch}"
+                  &quot;{activeSearch}&quot;
                   <button onClick={() => updateFilter('search', '')} className="hover:text-primary-900">
                     <FiX className="w-3 h-3" />
                   </button>

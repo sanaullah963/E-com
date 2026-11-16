@@ -407,7 +407,7 @@ const hasVariantsValue = watch('hasVariants');
   ) : (
     <div className="mt-3 p-3 bg-surface-50 rounded-lg">
       <p className="text-xs text-surface-500">
-        💡 উপরে চেকবক্সে টিক দিয়ে "পণ্য আপডেট করুন" চাপুন —
+        💡 উপরে চেকবক্সে টিক দিয়ে &quot;পণ্য&quot; আপডেট করুন&quot; চাপুন —
         তারপর Variant যোগ করার অপশন দেখাবে।
       </p>
     </div>

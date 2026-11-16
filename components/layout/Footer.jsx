@@ -18,7 +18,7 @@ export default function Footer() {
               <span className="text-white text-xl font-bold">{APP_NAME}</span>
             </div>
             <p className="text-sm leading-relaxed text-surface-400 max-w-xs">
-              Bangladesh's premier online shopping destination. Quality products, fast delivery, secure payments.
+              Bangladesh&apos;s premier online shopping destination. Quality products, fast delivery, secure payments.
             </p>
             <div className="flex gap-3 mt-4">
               {[FiFacebook, FiInstagram, FiTwitter].map((Icon, i) => (
