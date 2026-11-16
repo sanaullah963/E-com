@@ -1,0 +1,142 @@
+"use client";
+import { useEffect, useState, useCallback, useRef } from "react";
+
+// --- র‍্যান্ডম নাম ও জেলার লিস্ট — শুধু ভিজুয়াল সোশ্যাল-প্রুফের জন্য, আসল অর্ডার
+// ডেটা থেকে আসে না (কোনো API কল হয় না) ---
+const NAMES = [
+  "আব্দুল", "রবিন", "রফিক", "নাসির উদ্দিন", "কামাল", "সুমাইয়া", "ইমরান", "ফারুক",
+  "হাসান", "সানি", "সজীব", "তানিয়া", "আরিফ", "রাকিন", "সিমুল", "পলাশ",
+  "রাসেল", "সাথিল", "মামুন", "শারমিন", "জাহিদ", "প্রিন্স", "সোহেল", "আদনান লিও",
+  "তুহিন", "মুয়াজ", "মিজান", "মানাফ", "ফাহিম", "খাইরুল",
+];
+
+const LOCATIONS = [
+  "ঢাকা", "চট্টগ্রাম", "খুলনা", "রাজশাহী", "সিলেট", "বরিশাল", "রংপুর",
+  "ময়মনসিংহ", "কুমিল্লা", "নোয়াখালী", "ফরিদপুর", "যশোর", "বগুড়া", "দিনাজপুর",
+  "টাঙ্গাইল", "গাজীপুর", "নারায়ণগঞ্জ", "কক্সবাজার", "পাবনা", "জামালপুর","পটুয়াখালি", "আমতলী", "কুড়িগ্রাম","লালমনিরহাট",
+];
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// Fisher–Yates shuffle — নামের লিস্ট এলোমেলো করার জন্য
+function shuffle(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+const FIRST_DELAY_MS = 3000; // পেজ লোডের কতক্ষণ পর প্রথম নোটিফিকেশন দেখাবে
+const VISIBLE_MS = 4000; // একটা নোটিফিকেশন কতক্ষণ দেখা যাবে
+const GAP_MIN_MS = 5000; // দুইটা নোটিফিকেশনের মাঝে সর্বনিম্ন বিরতি
+const GAP_MAX_MS = 10000; // দুইটা নোটিফিকেশনের মাঝে সর্বোচ্চ বিরতি
+
+// --- কাস্টমার পেজে ব্রাউজ করার সময় মাঝে মাঝে ওপর থেকে একটা "অমুক এইমাত্র অর্ডার
+// করেছেন" স্টাইলের নোটিফিকেশন কার্ড দেখায় (সোশ্যাল প্রুফ/FOMO)। নাম/লোকেশন/সময় সম্পূর্ণ
+// র‍্যান্ডম — বাস্তব অর্ডার ডেটার সাথে কোনো সম্পর্ক নেই, তাই কোনো backend কল লাগে না। ---
+export default function RecentOrderPopup({ page }) {
+  const [order, setOrder] = useState(null);
+  const [visible, setVisible] = useState(false);
+  const timerRef = useRef(null);
+  // এই ব্রাউজিং সেশনে এখনো "না-দেখানো" নামের shuffle করা queue — pop হয়ে খালি
+  // হয়ে গেলেই শুধু পুরো লিস্ট আবার shuffle হয়ে রিফিল হবে, তার আগ পর্যন্ত একই
+  // কাস্টমারের কাছে একই নাম দুইবার আসবে না
+  const nameQueueRef = useRef([]);
+  const lastNameRef = useRef(null);
+
+  const productImage = page?.images?.[0] || "";
+  const productName = page?.productName || "";
+
+  const getNextName = useCallback(() => {
+    if (nameQueueRef.current.length === 0) {
+      const refilled = shuffle(NAMES);
+      // রিফিলের পর প্রথম নামটা যদি ঠিক আগের চক্রের শেষ নামের মতোই হয়ে যায়,
+      // সেটাও একটা "দুইবার একই নাম" case — তাই সেই বাউন্ডারি-রিপিট এড়ানো হচ্ছে
+      if (refilled.length > 1 && refilled[0] === lastNameRef.current) {
+        [refilled[0], refilled[1]] = [refilled[1], refilled[0]];
+      }
+      nameQueueRef.current = refilled;
+    }
+    const name = nameQueueRef.current.pop();
+    lastNameRef.current = name;
+    return name;
+  }, []);
+
+  const generateFakeOrder = useCallback(
+    () => ({
+      id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      name: getNextName(),
+      location: pick(LOCATIONS),
+      minutesAgo: Math.floor(Math.random() * 58) + 2, // ২–৫৯ মিনিট আগে
+    }),
+    [getNextName],
+  );
+
+  const scheduleNext = useCallback(
+    (delay) => {
+      clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        setOrder(generateFakeOrder());
+        setVisible(true);
+
+        // কিছুক্ষণ দেখানোর পর নিচে সরিয়ে দেওয়া, তারপর পরেরটার জন্য শিডিউল করা
+        timerRef.current = setTimeout(() => {
+          setVisible(false);
+          const nextGap = GAP_MIN_MS + Math.random() * (GAP_MAX_MS - GAP_MIN_MS);
+          scheduleNext(nextGap);
+        }, VISIBLE_MS);
+      }, delay);
+    },
+    [generateFakeOrder],
+  );
+
+  useEffect(() => {
+    scheduleNext(FIRST_DELAY_MS);
+    return () => clearTimeout(timerRef.current);
+  }, [scheduleNext]);
+
+  if (!order) return null;
+
+  return (
+    <div
+      className={`fixed left-1/2 top-3 z-[100] w-[92%] max-w-sm -translate-x-1/2 transition-all duration-500 ease-out ${
+        visible ? "translate-y-0 opacity-100" : "-translate-y-24 opacity-0"
+      }`}
+      role="status"
+      aria-live="polite"
+    >
+      <div className="flex items-center gap-3 rounded-md border border-green-100 bg-white p-1 shadow-xl">
+        {productImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={productImage}
+            alt={productName}
+            className="h-14 w-14 flex-shrink-0 rounded-md object-cover"
+          />
+        ) : (
+          <div className="h-14 w-14 flex-shrink-0 rounded-md bg-gray-100" />
+        )}
+        <div className="min-w-0">
+          <p className="text-xs font-semibold text-red-500">
+            {order.minutesAgo} মিনিট আগে
+          </p>
+          <p className="truncate text-sm font-bold text-gray-900">{order.name}</p>
+          <p className="truncate text-xs text-gray-500">
+            {order.location} থেকে অর্ডার করেছেন
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setVisible(false)}
+          aria-label="বন্ধ করুন"
+          className="ml-auto flex-shrink-0 self-center pe-2 text-gray-900 hover:text-red-500 cursor-pointer"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+  );
+}
